@@ -3,7 +3,7 @@
 FROM maven:latest
 
 # Set metadata information
-LABEL authors="hildd"
+LABEL authors="amirdi"
 
 # Set the working directory in the container
 WORKDIR /app

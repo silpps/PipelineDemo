@@ -1,20 +1,14 @@
 pipeline {
     agent any
     stages {
-        stage('Compile') {
+        stage('Check') {
             steps {
-                echo 'Compile stage completed'
+                git branch: "master", url: 'https://github.com/silpps/PipelineDemo'
             }
         }
-        stage('Test') {
+        stage('Build') {
             steps {
-                echo 'Test stage completed'
+                sh 'mvn clean install'
             }
         }
-        stage('Deploy') {
-            steps {
-                echo 'Deploy stage completed'
-            }
-        }
-    }
-}
+        }}

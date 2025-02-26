@@ -1,57 +1,32 @@
 pipeline {
-    agent any
+    agent any // IN THE LECTURE I WILL EXPLAIN THE SCRIPT AND THE WORKFLOW
 
     environment {
-        DOCKERHUB_CREDENTIALS_ID = 'dockerhub-credentials'  // Jenkins credentials ID
-        DOCKERHUB_REPO = 'hildd/pipelinedemo'  // Docker Hub repository
-        DOCKER_IMAGE_TAG = 'latest'  // Image tag
+        // Define Docker Hub credentials ID
+        DOCKERHUB_CREDENTIALS_ID = 'dockerhub-credentials'
+        // Define Docker Hub repository name
+        DOCKERHUB_REPO = 'hildd/calculator'
+        // Define Docker image tag
+        DOCKER_IMAGE_TAG = 'latest'
     }
-
     stages {
-        stage('Check') {
+        stage('Checkout') {
             steps {
-                cleanWs() // Clean workspace to avoid conflicts
-                git branch: "master", url: 'https://github.com/silpps/PipelineDemo'
-            }
-        }
-        stage('Build') {
-            steps {
-                script {
-                    if (isUnix()) {
-                        sh 'mvn clean install'
-                    } else {
-                        bat 'mvn clean install'
-                    }
-                }
-            }
-        }
-        stage('Set Docker Context') {
-            steps {
-                script {
-                    sh 'docker context use default'
-                }
+                // Checkout code from Git repository
+                git 'https://github.com/silpps/PipelineDemo.git'
             }
         }
         stage('Build Docker Image') {
             steps {
+                // Build Docker image
                 script {
                     docker.build("${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG}")
                 }
             }
         }
-        stage('Login to Docker Hub') {
-            steps {
-                script {
-                    withCredentials([usernamePassword(credentialsId: DOCKERHUB_CREDENTIALS_ID,
-                                    usernameVariable: 'DOCKERHUB_USERNAME',
-                                    passwordVariable: 'DOCKERHUB_PASSWORD')]) {
-                        sh 'echo $DOCKERHUB_PASSWORD | docker login -u $DOCKERHUB_USERNAME --password-stdin'
-                    }
-                }
-            }
-        }
         stage('Push Docker Image to Docker Hub') {
             steps {
+                // Push Docker image to Docker Hub
                 script {
                     docker.withRegistry('https://index.docker.io/v1/', DOCKERHUB_CREDENTIALS_ID) {
                         docker.image("${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG}").push()
@@ -61,3 +36,4 @@ pipeline {
         }
     }
 }
+
